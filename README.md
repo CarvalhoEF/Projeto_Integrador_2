@@ -81,4 +81,4 @@ O Streamlit Cloud detectará as alterações e fará o redeploy automaticamente.
 ## 👩‍💻 Autoria
 
 **Elen Carvalho**  
-💡 *“Da análise à aplicação: dados que conectam destinos.”*
+💡 *“Da análise à aplicação: dados que conectam destinos. Obrigada!”*
