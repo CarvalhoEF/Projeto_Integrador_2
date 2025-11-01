@@ -4,7 +4,7 @@ import joblib
 import sklearn.compose
 import types
 
-# ⚠️ WORKAROUND CRÍTICO - resolve incompatibilidade do sklearn
+# WORKAROUND CRÍTICO - resolve incompatibilidade do sklearn
 if not hasattr(sklearn.compose, '_RemainderColsList'):
     class _RemainderColsList:
         pass
@@ -12,15 +12,15 @@ if not hasattr(sklearn.compose, '_RemainderColsList'):
 
 st.set_page_config(page_title="Previsão de Preços", layout="centered")
 
-# ⚠️ CARREGAMENTO DIRETO SEM CACHE ⚠️
+# CARREGAMENTO DIRETO SEM CACHE
 try:
     modelo = joblib.load("models/best_model_RandomForest.joblib")
-    st.success("✅ Modelo carregado com sucesso!")
+    st.success("Modelo carregado com sucesso!")
 except Exception as e:
-    st.error(f"❌ Erro ao carregar modelo: {e}")
+    st.error(f"Erro ao carregar modelo: {e}")
     st.stop()
 
-st.title("✈️ Previsão de Preços de Passagens Aéreas")
+st.title("Previsão de Preços de Passagens Aéreas")
 st.write("Preencha as informações abaixo para estimar o preço da passagem.")
 
 col1, col2 = st.columns(2)
@@ -38,7 +38,6 @@ with col2:
     duration = st.number_input("Duração (horas)", min_value=0.5, max_value=30.0, value=2.0, step=0.5)
     days_left = st.slider("Dias até voo", 1, 60, 15)
 
-# Funções auxiliares
 def calcular_periodo(departure_time):
     period_mapping = {
         'Early_Morning': 'madrugada', 'Morning': 'manha', 'Afternoon': 'tarde',
@@ -56,7 +55,7 @@ def categorizar_duracao(duration):
     elif duration <= 5: return 'media'
     else: return 'longa'
 
-if st.button("��� Prever Preço"):
+if st.button("Prever Preço"):
     try:
         dados = pd.DataFrame({
             'airline': [airline],
@@ -74,7 +73,7 @@ if st.button("��� Prever Preço"):
         })
         
         preco = modelo.predict(dados)[0]
-        st.success(f"**Preço estimado: ₹ {preco:,.2f}**")
+        st.success(f"Preço estimado: ₹ {preco:,.2f}")
         
     except Exception as e:
         st.error(f"Erro na previsão: {e}")
