@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import os
 
 st.set_page_config(page_title="Previsão de Preços", layout="centered")
 
@@ -8,12 +9,14 @@ st.title("✈️ Previsão de Preços de Passagens Aéreas")
 st.write("Preencha as informações abaixo para estimar o preço da passagem.")
 
 # =============================
-# CARREGAMENTO DO MODELO
+# CARREGAMENTO DO MODELO - CORRIGIDO
 # =============================
 @st.cache_resource
 def carregar_modelo():
     try:
-        modelo = joblib.load("Projeto_Integrador_2_clean/models/best_model_RandomForest.joblib")
+        # Caminho corrigido para funcionar no Streamlit Cloud
+        caminho_modelo = os.path.join(os.path.dirname(__file__), 'models', 'best_model_RandomForest.joblib')
+        modelo = joblib.load(caminho_modelo)
         return modelo
     except Exception as e:
         st.error(f"Erro ao carregar o modelo: {e}")
