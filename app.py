@@ -1,6 +1,14 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import sklearn.compose
+import types
+
+# ⚠️ WORKAROUND CRÍTICO - resolve incompatibilidade do sklearn
+if not hasattr(sklearn.compose, '_RemainderColsList'):
+    class _RemainderColsList:
+        pass
+    sklearn.compose._RemainderColsList = _RemainderColsList
 
 st.set_page_config(page_title="Previsão de Preços", layout="centered")
 
@@ -13,6 +21,7 @@ except Exception as e:
     st.stop()
 
 st.title("✈️ Previsão de Preços de Passagens Aéreas")
+st.write("Preencha as informações abaixo para estimar o preço da passagem.")
 
 col1, col2 = st.columns(2)
 
@@ -47,7 +56,7 @@ def categorizar_duracao(duration):
     elif duration <= 5: return 'media'
     else: return 'longa'
 
-if st.button("💰 Prever Preço"):
+if st.button("��� Prever Preço"):
     try:
         dados = pd.DataFrame({
             'airline': [airline],
