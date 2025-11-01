@@ -13,7 +13,7 @@ st.write("Preencha as informações abaixo para estimar o preço da passagem.")
 @st.cache_resource
 def carregar_modelo():
     try:
-        modelo = joblib.load("models/best_model_RandomForest.joblib")
+        modelo = joblib.load("Projeto_Integrador_2_clean/models/best_model_RandomForest.joblib")
         return modelo
     except Exception as e:
         st.error(f"Erro ao carregar o modelo: {e}")
