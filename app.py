@@ -1,56 +1,47 @@
 import streamlit as st
 import pandas as pd
 import joblib
-import sys
-import types
-
-# WORKAROUND SUPER AGRESSIVO - deve resolver
-try:
-    # Tentar importar e modificar diretamente
-    from sklearn.compose._column_transformer import _RemainderColsList
-except ImportError:
-    # Se não existe, criar a classe
-    class _RemainderColsList:
-        pass
-    
-    # Injeta em todos os lugares possíveis
-    import sklearn.compose._column_transformer as ct
-    ct._RemainderColsList = _RemainderColsList
-    
-    import sklearn.compose as comp
-    comp._RemainderColsList = _RemainderColsList
-    
-    # Adiciona ao sys.modules
-    sys.modules['sklearn.compose._column_transformer']._RemainderColsList = _RemainderColsList
 
 st.set_page_config(page_title="Previsão de Preços", layout="centered")
 
-# CARREGAMENTO DIRETO SEM CACHE
-try:
-    modelo = joblib.load("models/best_model_RandomForest.joblib")
-    st.success("Modelo carregado com sucesso!")
-except Exception as e:
-    st.error(f"Erro ao carregar modelo: {e}")
-    st.stop()
-
-st.title("Previsão de Preços de Passagens Aéreas")
+st.title("✈️ Previsão de Preços de Passagens Aéreas")
 st.write("Preencha as informações abaixo para estimar o preço da passagem.")
 
+# =============================
+# CARREGAMENTO DO MODELO
+# =============================
+@st.cache_resource
+def carregar_modelo():
+    try:
+        modelo = joblib.load("models/best_model_RandomForest.joblib")
+        return modelo
+    except Exception as e:
+        st.error(f"Erro ao carregar o modelo: {e}")
+        st.stop()
+
+modelo = carregar_modelo()
+
+# =============================
+# INTERFACE DE ENTRADA
+# =============================
 col1, col2 = st.columns(2)
 
 with col1:
     airline = st.selectbox("Companhia", ['IndiGo', 'Air India', 'Jet Airways', 'SpiceJet', 'Vistara', 'GoAir'])
     source_city = st.selectbox("Origem", ['Delhi', 'Mumbai', 'Kolkata', 'Chennai', 'Bangalore', 'Hyderabad'])
-    departure_time = st.selectbox("Saída", ['Early_Morning', 'Morning', 'Afternoon', 'Evening', 'Night', 'Late_Night'])
+    departure_time = st.selectbox("Horário de Saída", ['Early_Morning', 'Morning', 'Afternoon', 'Evening', 'Night', 'Late_Night'])
     stops = st.selectbox("Paradas", ['zero', 'one', 'two_or_more'])
     flight_class = st.selectbox("Classe", ['Economy', 'Business'])
 
 with col2:
     destination_city = st.selectbox("Destino", ['Delhi', 'Mumbai', 'Kolkata', 'Chennai', 'Bangalore', 'Hyderabad'])
-    arrival_time = st.selectbox("Chegada", ['Early_Morning', 'Morning', 'Afternoon', 'Evening', 'Night', 'Late_Night'])
+    arrival_time = st.selectbox("Horário de Chegada", ['Early_Morning', 'Morning', 'Afternoon', 'Evening', 'Night', 'Late_Night'])
     duration = st.number_input("Duração (horas)", min_value=0.5, max_value=30.0, value=2.0, step=0.5)
-    days_left = st.slider("Dias até voo", 1, 60, 15)
+    days_left = st.slider("Dias até o voo", 1, 60, 15)
 
+# =============================
+# FUNÇÕES AUXILIARES
+# =============================
 def calcular_periodo(departure_time):
     period_mapping = {
         'Early_Morning': 'madrugada', 'Morning': 'manha', 'Afternoon': 'tarde',
@@ -59,18 +50,27 @@ def calcular_periodo(departure_time):
     return period_mapping.get(departure_time, 'manha')
 
 def categorizar_dias(days_left):
-    if days_left <= 7: return 'ultima_hora'
-    elif days_left <= 30: return 'curto_prazo'
-    else: return 'longo_prazo'
+    if days_left <= 7:
+        return 'ultima_hora'
+    elif days_left <= 30:
+        return 'curto_prazo'
+    else:
+        return 'longo_prazo'
 
 def categorizar_duracao(duration):
-    if duration <= 2: return 'curta'
-    elif duration <= 5: return 'media'
-    else: return 'longa'
+    if duration <= 2:
+        return 'curta'
+    elif duration <= 5:
+        return 'media'
+    else:
+        return 'longa'
 
-if st.button("Prever Preço"):
+# =============================
+# PREDIÇÃO
+# =============================
+if st.button("💰 Prever Preço"):
     try:
-        dados = pd.DataFrame({
+        entrada = pd.DataFrame({
             'airline': [airline],
             'class': [flight_class],
             'source_city': [source_city],
@@ -84,12 +84,13 @@ if st.button("Prever Preço"):
             'days_category': [categorizar_dias(days_left)],
             'duration_cat': [categorizar_duracao(duration)]
         })
-        
-        preco = modelo.predict(dados)[0]
-        st.success(f"Preço estimado: ₹ {preco:,.2f}")
-        
+
+        preco_previsto = modelo.predict(entrada)[0]
+        st.success(f"💸 Preço estimado: ₹ {preco_previsto:,.2f}")
+
     except Exception as e:
         st.error(f"Erro na previsão: {e}")
 
 st.markdown("---")
-st.caption("App de Previsão de Preços de Passagens Aéreas")
+st.caption("Desenvolvido para o Projeto Integrador 2 — Previsão de Passagens Aéreas")
+
